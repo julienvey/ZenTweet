@@ -2,6 +2,8 @@
 
 #import('dart:io');
 #import('dart:json');
+#import('dart:isolate');
+#import('server-utils.dart');
 #import('shared/Domain.dart');
 
 List<Tweet> tweets;
@@ -39,7 +41,7 @@ class TweetFeedHandler {
     print('new ws conn');
     connections.add(conn);
 
-    List<String> tweetMapList = new List();
+    List<Map> tweetMapList = new List();
     tweets.forEach((e) {
       tweetMapList.add(e.mapify());
     });
@@ -58,7 +60,6 @@ class TweetFeedHandler {
           queue(() => connection.send(message));
         }
       });
-      time('send to isolate', () => log.log(message));
     };
 
     conn.onError = (e) {
