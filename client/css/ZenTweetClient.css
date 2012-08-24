@@ -1,0 +1,12 @@
+#tweetButtonZone {
+	text-align: right;
+}
+
+#tweetCharsLeft.warn {
+	color: #5C0002;
+}
+
+#tweetCharsLeft.superwarn {
+	color: #D40D12;
+}
+
