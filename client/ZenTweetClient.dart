@@ -3,12 +3,14 @@
 #import('dart:html');
 #import('dart:json');
 #import('../shared/Domain.dart');
+#import('UiLibrary.dart');
 
 TweetInput tweetInput;
 DivElement tweetButtonZone;
 TweetCharsLeft tweetCharsLeft;
 TweetButton tweetButton;
 TweetConnection connection;
+TweetFeed tweetFeed;
 
 void main() {
    tweetInput =  new TweetInput(query("#tweetInput"));
@@ -16,6 +18,7 @@ void main() {
    DivElement tweetZone = query("#tweetZone");
    tweetButton = new TweetButton(query("#tweetButton"));
    tweetCharsLeft = new TweetCharsLeft(query("#tweetCharsLeft"));
+   tweetFeed = new TweetFeed(query("#tweetFeed"));
 
    connection = new TweetConnection("ws://127.0.0.1:1337/ws");
 }
@@ -115,6 +118,16 @@ class TweetButton extends View<ButtonElement> {
   }
 }
 
+class TweetFeed extends View<DivElement> {
+  TweetFeed(DivElement element) : super(element);
+  
+  setTweets(List<Tweet> tweets){
+    tweets.forEach((e) {
+      element.nodes.add(new TweetPanel.fromTweet(e).asWidget());
+    });
+  }
+}
+
 class TweetConnection {
   WebSocket webSocket;
   String url;
@@ -129,11 +142,20 @@ class TweetConnection {
   }
 
   _receivedEncodedMessage(String encodedMessage) {
-    Map message = JSON.parse(encodedMessage);
-    if (message['f'] != null) {
-      print("${message['m']} ${message['f']}");
-    }
+    List<Tweet> tweets = getTweetList(encodedMessage);
+    tweetFeed.setTweets(tweets);
+    
   }
+  
+  List<Tweet> getTweetList(String json) {
+    List<Map> messages = JSON.parse(json);
+    List<Tweet> tweets = new List();
+    messages.forEach((e) {
+        print("${e['author']} ${e['text']}");
+        tweets.add(new Tweet.fromMap(e));
+    });
+    return tweets;
+}
 
   _sendEncodedMessage(String encodedMessage) {
     if (webSocket != null && webSocket.readyState == WebSocket.OPEN) {
