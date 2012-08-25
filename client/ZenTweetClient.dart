@@ -20,7 +20,7 @@ void main() {
    tweetButton = new TweetButton(query("#tweetButton"));
    tweetCharsLeft = new TweetCharsLeft(query("#tweetCharsLeft"));
    tweetFeed = new TweetFeed(query("#tweetFeed"));
-   alertField = new AlertField(query("#alertField"));
+   alertField = new AlertField(query("#alertFieldContainer"));
    
    connection = new TweetConnection("ws://127.0.0.1:1337/ws");
 }
@@ -40,24 +40,28 @@ abstract class View<T extends Element> {
 }
 
 class AlertField extends View<DivElement> {
-  AlertField(DivElement element) : super(element);
+  AlertField(DivElement element) : super(element){
+  }
   
   alert(String type, String text) {
-    element.hidden = false;
-    element.innerHTML = text;
+    DivElement alertFieldDiv = new Element.html("<div id='alertField' class='alert'><button type='button' class='close' data-dismiss='alert'>×</button><span id='alertFieldText'></span></div>");
+    
+    Element textField = alertFieldDiv.query("#alertFieldText");
+    textField.innerHTML = text;
     switch(type){
       case 'SUCCESS' :
-        element.attributes['class'] = "alert alert-success fade in";
+        alertFieldDiv.attributes['class'] = "alert alert-success fade in";
         break;
       case 'INFO' :
-        element.attributes['class'] = "alert alert-info fade in";
+        alertFieldDiv.attributes['class'] = "alert alert-info fade in";
         break;
       case 'ERROR' :
-        element.attributes['class'] = "alert alert-error fade in";
+        alertFieldDiv.attributes['class'] = "alert alert-error fade in";
         break;
       default :
-        element.attributes['class'] = "alert";
+        alertFieldDiv.attributes['class'] = "alert";
     }
+    element.nodes.add(alertFieldDiv);
   }
 }
 
@@ -207,7 +211,7 @@ class TweetConnection {
   _sendEncodedMessage(String encodedMessage) {
     if (webSocket != null && webSocket.readyState == WebSocket.OPEN) {
       webSocket.send(encodedMessage);
-      alertField.alert('SUCCESS', "Tweet envoyé");
+      alertField.alert('SUCCESS', "Tweet envoyé avec succès");
     } else {
       print('WebSocket not connected, message $encodedMessage not sent');
     }
