@@ -11,6 +11,7 @@ TweetCharsLeft tweetCharsLeft;
 TweetButton tweetButton;
 TweetConnection connection;
 TweetFeed tweetFeed;
+AlertField alertField;
 
 void main() {
    tweetInput =  new TweetInput(query("#tweetInput"));
@@ -19,7 +20,8 @@ void main() {
    tweetButton = new TweetButton(query("#tweetButton"));
    tweetCharsLeft = new TweetCharsLeft(query("#tweetCharsLeft"));
    tweetFeed = new TweetFeed(query("#tweetFeed"));
-
+   alertField = new AlertField(query("#alertField"));
+   
    connection = new TweetConnection("ws://127.0.0.1:1337/ws");
 }
 
@@ -37,6 +39,28 @@ abstract class View<T extends Element> {
   }
 }
 
+class AlertField extends View<DivElement> {
+  AlertField(DivElement element) : super(element);
+  
+  alert(String type, String text) {
+    element.hidden = false;
+    element.innerHTML = text;
+    switch(type){
+      case 'SUCCESS' :
+        element.attributes['class'] = "alert alert-success fade in";
+        break;
+      case 'INFO' :
+        element.attributes['class'] = "alert alert-info fade in";
+        break;
+      case 'ERROR' :
+        element.attributes['class'] = "alert alert-error fade in";
+        break;
+      default :
+        element.attributes['class'] = "alert";
+    }
+  }
+}
+
 class TweetInput extends View<TextAreaElement> {
   TweetInput(TextAreaElement element) : super(element);
 
@@ -48,18 +72,29 @@ class TweetInput extends View<TextAreaElement> {
     });
 
     element.on.blur.add((e) {
-      if(element.value.length == 0){
-        element.placeholder = "Écrire un nouveau tweet...";
-        element.rows = 1;
-        element.value = "";
-        tweetButtonZone.hidden = true;
-      }
+      _manageBlur();
     });
 
     element.on.input.add((e) {
       _computeCharsLeft();
       _manageButtonVisibility();
     });
+  }
+  
+  void _manageBlur() {
+    if(element.value.length == 0){
+      element.placeholder = "Écrire un nouveau tweet...";
+      element.rows = 1;
+      element.value = "";
+      tweetButtonZone.hidden = true;
+    }
+  }
+  
+  reset() {
+    element.value = "";
+    _manageBlur();
+    _computeCharsLeft();
+    _manageButtonVisibility();
   }
 
   void _manageButtonVisibility() {
@@ -79,6 +114,10 @@ class TweetInput extends View<TextAreaElement> {
     } else {
       tweetCharsLeft.clear();
     }
+  }
+  
+  String getTweetValue(){ 
+    return element.value;
   }
 }
 
@@ -116,6 +155,14 @@ class TweetButton extends View<ButtonElement> {
   disable(){
     _setClass("btn disabled");
   }
+  
+  bind(){
+    element.on.click.add((e) {
+      // FIXME send the author name instead of constant string
+      connection.sendTweet("Julien", tweetInput.getTweetValue());
+      tweetInput.reset();
+    });
+  }
 }
 
 class TweetFeed extends View<DivElement> {
@@ -136,11 +183,11 @@ class TweetConnection {
     _init();
   }
 
-  send(String from, String message) {
-    var encoded = JSON.stringify({'f': from, 'm': message});
+  sendTweet(String from, String message) {
+    var encoded = JSON.stringify({'author': from, 'text': message});
     _sendEncodedMessage(encoded);
   }
-
+  
   _receivedEncodedMessage(String encodedMessage) {
     List<Tweet> tweets = getTweetList(encodedMessage);
     tweetFeed.setTweets(tweets);
@@ -155,11 +202,12 @@ class TweetConnection {
         tweets.add(new Tweet.fromMap(e));
     });
     return tweets;
-}
+  }
 
   _sendEncodedMessage(String encodedMessage) {
     if (webSocket != null && webSocket.readyState == WebSocket.OPEN) {
       webSocket.send(encodedMessage);
+      alertField.alert('SUCCESS', "Tweet envoyé");
     } else {
       print('WebSocket not connected, message $encodedMessage not sent');
     }
