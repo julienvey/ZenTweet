@@ -44,6 +44,9 @@ class AlertField extends View<DivElement> {
   }
   
   alert(String type, String text) {
+    if(element.nodes.length > 0){
+      element.nodes.clear();
+    }
     DivElement alertFieldDiv = new Element.html("<div id='alertField' class='alert'><button type='button' class='close' data-dismiss='alert'>×</button><span id='alertFieldText'></span></div>");
     
     Element textField = alertFieldDiv.query("#alertFieldText");
@@ -62,6 +65,9 @@ class AlertField extends View<DivElement> {
         alertFieldDiv.attributes['class'] = "alert";
     }
     element.nodes.add(alertFieldDiv);
+    window.setTimeout(() {
+      alertFieldDiv.remove();      
+    }, 3000);
   }
 }
 
