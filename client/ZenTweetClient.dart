@@ -2,7 +2,7 @@
 
 #import('dart:html');
 #import('dart:json');
-#import('../shared/Domain.dart');
+#import('shared/Domain.dart');
 #import('UiLibrary.dart');
 
 TweetInput tweetInput;
@@ -188,7 +188,7 @@ class TweetConnection {
   }
 
   sendTweet(String from, String message) {
-    var encoded = JSON.stringify({'author': from, 'text': message});
+    var encoded = JSON.stringify([{'author': from, 'text': message}]);
     _sendEncodedMessage(encoded);
   }
   

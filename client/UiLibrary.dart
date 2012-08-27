@@ -1,6 +1,6 @@
 #library('ZenTweetUi');
 
-#import('../shared/Domain.dart');
+#import('shared/Domain.dart');
 #import('dart:html');
 
 class TweetPanel {

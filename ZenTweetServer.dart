@@ -4,7 +4,7 @@
 #import('dart:json');
 #import('dart:isolate');
 #import('server-utils.dart');
-#import('shared/Domain.dart');
+#import('client/shared/Domain.dart');
 
 List<Tweet> tweets;
 
@@ -55,10 +55,10 @@ class TweetFeedHandler {
     conn.onMessage = (message) {
       print('new ws msg: $message');
       connections.forEach((connection) {
-        if (conn != connection) {
+        //if (conn != connection) {
           print('queued msg to be sent');
           queue(() => connection.send(message));
-        }
+        //}
       });
     };
 
