@@ -173,6 +173,7 @@ class TweetFeed extends View<DivElement> {
   TweetFeed(DivElement element) : super(element);
   
   setTweets(List<Tweet> tweets){
+    element.nodes.clear();
     tweets.forEach((e) {
       element.nodes.add(new TweetPanel.fromTweet(e).asWidget());
     });
@@ -182,8 +183,11 @@ class TweetFeed extends View<DivElement> {
 class TweetConnection {
   WebSocket webSocket;
   String url;
+  
+  List<Tweet> _allTweets;
 
   TweetConnection(this.url) {
+    _allTweets = new List();
     _init();
   }
 
@@ -194,7 +198,13 @@ class TweetConnection {
   
   _receivedEncodedMessage(String encodedMessage) {
     List<Tweet> tweets = getTweetList(encodedMessage);
-    tweetFeed.setTweets(tweets);
+    List<Tweet> tweetsToFeed = new List();
+    tweetsToFeed.addAll(tweets);
+    tweetsToFeed.addAll(_allTweets);
+    
+    _allTweets = tweetsToFeed;
+    
+    tweetFeed.setTweets(_allTweets);
     
   }
   

@@ -55,10 +55,8 @@ class TweetFeedHandler {
     conn.onMessage = (message) {
       print('new ws msg: $message');
       connections.forEach((connection) {
-        //if (conn != connection) {
           print('queued msg to be sent');
           queue(() => connection.send(message));
-        //}
       });
     };
 
