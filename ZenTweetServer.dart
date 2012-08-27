@@ -10,8 +10,6 @@ List<Tweet> tweets;
 
 main() {
   tweets = new List();
-  tweets.add(new Tweet("Julien", "Coucou"));
-  tweets.add(new Tweet("Julien2", "Salut"));
 
   var script = new File(new Options().script);
   var directory = script.directorySync();
@@ -36,7 +34,7 @@ class TweetFeedHandler {
   Set<WebSocketConnection> connections;
 
   TweetFeedHandler() : connections = new Set<WebSocketConnection>();
-
+  
   onOpen(WebSocketConnection conn) {
     print('new ws conn');
     connections.add(conn);
@@ -54,6 +52,10 @@ class TweetFeedHandler {
 
     conn.onMessage = (message) {
       print('new ws msg: $message');
+      List temp = new List();
+      temp.add(new Tweet.fromMap(JSON.parse(message)[0]));
+      temp.addAll(tweets);
+      tweets = temp;
       connections.forEach((connection) {
           print('queued msg to be sent');
           queue(() => connection.send(message));
