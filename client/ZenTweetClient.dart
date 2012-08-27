@@ -12,8 +12,10 @@ TweetButton tweetButton;
 TweetConnection connection;
 TweetFeed tweetFeed;
 AlertField alertField;
+InputElement pseudo;
 
 void main() {
+   pseudo = query("#pseudo");
    tweetInput =  new TweetInput(query("#tweetInput"));
    tweetButtonZone = query("#tweetButtonZone");
    DivElement tweetZone = query("#tweetZone");
@@ -89,6 +91,12 @@ class TweetInput extends View<TextAreaElement> {
       _computeCharsLeft();
       _manageButtonVisibility();
     });
+    
+    pseudo.on.input.add((e) {
+      if(element.value.length > 0){
+        _manageButtonVisibility();
+      }
+    });
   }
   
   void _manageBlur() {
@@ -108,7 +116,7 @@ class TweetInput extends View<TextAreaElement> {
   }
 
   void _manageButtonVisibility() {
-     if(element.value.length > 0 && element.value.length <= 140){
+     if(element.value.length > 0 && element.value.length <= 140 && pseudo.value.length >0){
       tweetButton.enable();
     } else {
       tweetButton.disable();
@@ -169,7 +177,7 @@ class TweetButton extends View<ButtonElement> {
   bind(){
     element.on.click.add((e) {
       // FIXME send the author name instead of constant string
-      connection.sendTweet("Julien", tweetInput.getTweetValue());
+      connection.sendTweet(pseudo.value, tweetInput.getTweetValue());
       tweetInput.reset();
     });
   }
